@@ -3,12 +3,12 @@ tpmstream_wrapper.py
 
 Wrapper around external tpmstream library.
 
-This is the ONLY file that imports
+This is the ONLY file that directly imports
 and communicates with tpmstream.
 
 Purpose:
 
-Raw TPM bytes
+TPM command / response bytes
 
         ↓
 
@@ -16,7 +16,7 @@ tpmstream
 
         ↓
 
-Human readable TPM structures
+Human readable TPM tree
 
 
 This file does NOT:
@@ -33,13 +33,75 @@ This file does NOT:
 
 try:
 
-    import tpmstream
+    from tpmstream.io.binary import Binary
+
+    from tpmstream.io.pretty import Pretty
+
+    from tpmstream.spec.commands import (
+        Command,
+        Response
+    )
 
 
 except ImportError:
 
 
-    tpmstream = None
+    Binary = None
+
+    Pretty = None
+
+    Command = None
+
+    Response = None
+
+
+
+# =========================================================
+# HELPER
+# =========================================================
+
+
+def list_to_bytes(data):
+
+    """
+    Convert list:
+
+        [0x80,0x01]
+
+    into:
+
+        b'\\x80\\x01'
+    """
+
+
+    return bytes(data)
+
+
+
+def pretty_output(events):
+
+    """
+    Convert tpmstream events
+    into readable string.
+    """
+
+
+    output = []
+
+
+    pretty = Pretty.unmarshal(
+        events
+    )
+
+
+    for line in pretty:
+
+        output.append(
+            str(line)
+        )
+
+
+    return "\n".join(output)
 
 
 
@@ -51,47 +113,62 @@ except ImportError:
 def decode_command(command_bytes):
 
     """
-    Decode TPM command bytes.
+    Decode TPM command.
+
 
     Input:
 
-        Complete TPM command:
+        list of bytes
 
-        80 02
-        00 00 00 35
-        00 00 01 82
-        ...
+
+    Example:
+
+        [
+        0x80,0x01,
+        0x00,0x00,0x00,0x0C,
+        0x00,0x00,0x01,0x44
+        ]
 
 
     Output:
 
-        Text output from tpmstream
+        Pretty TPM structure
     """
 
 
-    if tpmstream is None:
+    if Binary is None:
+
 
         return (
             "ERROR:\n"
-            "tpmstream library not installed."
+            "tpmstream not installed"
         )
+
 
 
     try:
 
 
-        # Placeholder wrapper.
-        #
-        # Actual tpmstream API connection
-        # happens here.
-
-
-        decoded = tpmstream.decode(
+        buffer = list_to_bytes(
             command_bytes
         )
 
 
-        return str(decoded)
+        events = Binary.marshal(
+
+            tpm_type = Command,
+
+            buffer = buffer,
+
+            abort_on_error = False
+
+        )
+
+
+
+        return pretty_output(
+            events
+        )
 
 
 
@@ -102,7 +179,7 @@ def decode_command(command_bytes):
 
             "TPM Command Decode Failed\n\n"
 
-            f"Error:\n{error}"
+            f"{error}"
 
         )
 
@@ -121,31 +198,21 @@ def decode_response(
     """
     Decode TPM response.
 
-    TPM response requires previous command.
 
-    Input:
+    Response needs:
 
-        response bytes
+        - response bytes
 
-        command_code
-
-
-    Example:
-
-        response:
-            80 01....
-
-        command:
-            TPM_CC_PCR_Extend
+        - previous TPM command code
     """
 
 
-    if tpmstream is None:
+    if Binary is None:
 
 
         return (
             "ERROR:\n"
-            "tpmstream library not installed."
+            "tpmstream not installed"
         )
 
 
@@ -153,13 +220,29 @@ def decode_response(
     try:
 
 
-        decoded = tpmstream.decode(
-            response_bytes,
-            command_code
+        buffer = list_to_bytes(
+            response_bytes
         )
 
 
-        return str(decoded)
+
+        events = Binary.marshal(
+
+            tpm_type = Response,
+
+            buffer = buffer,
+
+            command_code = command_code,
+
+            abort_on_error = False
+
+        )
+
+
+
+        return pretty_output(
+            events
+        )
 
 
 
@@ -170,9 +253,9 @@ def decode_response(
 
             "TPM Response Decode Failed\n\n"
 
-            f"Command Code:\n{command_code}\n\n"
+            f"Command Code : {command_code}\n\n"
 
-            f"Error:\n{error}"
+            f"{error}"
 
         )
 
@@ -186,20 +269,26 @@ def decode_response(
 if __name__ == "__main__":
 
 
-    sample = [
+    startup_command = [
 
         0x80,0x01,
 
-        0x00,0x00,0x00,0x0A,
+        0x00,0x00,0x00,0x0C,
 
-        0x00,0x00,0x01,0x44
+        0x00,0x00,0x01,0x44,
+
+        0x00,0x00
 
     ]
 
 
 
     print(
+
         decode_command(
-            sample
+
+            startup_command
+
         )
+
     )
