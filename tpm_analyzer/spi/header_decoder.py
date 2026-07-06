@@ -130,19 +130,19 @@ def decode_spi_header(data):
     #
     # bit 7:
     #
-    # 1 = write
-    # 0 = read
+    # 0 = write
+    # 1 = read
     #
     # -----------------------------------------------------
 
 
     if header_byte & 0x80:
 
-        operation = "WRITE"
+        operation = "READ"
 
     else:
 
-        operation = "READ"
+        operation = "WRITE"
 
 
 

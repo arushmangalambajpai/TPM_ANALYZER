@@ -289,7 +289,9 @@ def decode_full(
     else:
 
 
-        payload = miso[4:]
+        size = header["transfer_size"]
+
+        payload = miso[-size:]
 
 
         source = "MISO"

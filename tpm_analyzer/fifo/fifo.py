@@ -1,29 +1,29 @@
 """
 fifo.py
 
-TPM FIFO Data Handler.
+TPM FIFO Payload Handler.
 
-This file understands TPM command and response
-byte streams transported through FIFO registers.
+This file handles byte streams AFTER a FIFO
+register has already been detected.
 
 It does NOT:
 - Decode SPI headers
-- Decode registers
+- Detect TPM registers
 - Decode TPM structures
 
 
 TPM Command:
 
-TAG          2 bytes
-SIZE         4 bytes
-COMMAND CODE 4 bytes
+TAG            2 bytes
+SIZE           4 bytes
+COMMAND CODE   4 bytes
 
 
 TPM Response:
 
-TAG           2 bytes
-SIZE          4 bytes
-RESPONSE CODE 4 bytes
+TAG            2 bytes
+SIZE           4 bytes
+RESPONSE CODE  4 bytes
 """
 
 
@@ -46,43 +46,76 @@ TPM_ST_SESSIONS = 0x8002
 
 
 # =========================================================
-# BASIC CHECKS
+# BASIC VALIDATION
 # =========================================================
 
 
 def is_fifo_stream(data):
 
     """
-    Check if bytes look like TPM FIFO data.
+    Check if FIFO payload contains
+    a valid TPM packet.
     """
 
 
-    if len(data) < 2:
+    if len(data) < 10:
 
         return False
 
 
-    tag = read_uint16(
-        data,
-        0
+
+    tag = get_tag(
+        data
     )
 
 
-    return tag in [
+
+    if tag not in [
 
         TPM_ST_NO_SESSIONS,
 
         TPM_ST_SESSIONS
 
-    ]
+    ]:
+
+
+        return False
+
+
+
+    size = get_size(
+        data
+    )
+
+
+
+    if size is None:
+
+
+        return False
+
+
+
+    if size > len(data):
+
+
+        return False
+
+
+
+    return True
+
 
 
 
 def get_tag(data):
 
-    """
-    Return TPM structure tag.
-    """
+
+    if len(data) < 2:
+
+
+        return None
+
 
 
     return read_uint16(
@@ -92,88 +125,75 @@ def get_tag(data):
 
 
 
-def get_size(data):
 
-    """
-    Return TPM command/response size.
-    """
+def get_size(data):
 
 
     if len(data) < 6:
 
+
         return None
 
 
+
     return read_uint32(
+
         data,
+
         2
+
     )
 
 
-
-def is_complete(data):
-
-    """
-    Check if complete TPM packet exists.
-    """
-
-
-    size = get_size(
-        data
-    )
-
-
-    if size is None:
-
-        return False
-
-
-    return len(data) >= size
-
-
-
-# =========================================================
-# COMMAND / RESPONSE DETECTION
-# =========================================================
 
 
 def get_code(data):
 
     """
-    TPM commandCode or responseCode.
+    Return:
 
-    Both exist at byte offset 6.
+    commandCode
+
+    OR
+
+    responseCode
     """
 
 
     if len(data) < 10:
 
+
         return None
 
 
+
     return read_uint32(
+
         data,
+
         6
+
     )
 
 
 
-def detect_fifo_type(data):
+
+# =========================================================
+# COMMAND DETECTION
+# =========================================================
+
+
+def is_command(data):
 
     """
-    Identify TPM FIFO payload.
-
-    Returns:
-
-        COMMAND
-        RESPONSE
-        UNKNOWN
+    Detect TPM command payload.
     """
 
 
     if not is_fifo_stream(data):
 
-        return "UNKNOWN"
+
+        return False
 
 
 
@@ -185,30 +205,64 @@ def detect_fifo_type(data):
 
     if code is None:
 
-        return "UNKNOWN"
+
+        return False
 
 
 
-    # TPM command codes are generally:
-    #
-    # 0x000001xx
-    # 0x000002xx
+    return (
 
-
-    if (
         0x00000100
+
         <= code
+
         <= 0x000002FF
-    ):
+
+    )
+
+
+
+
+def is_response(data):
+
+    """
+    Detect TPM response payload.
+    """
+
+
+    if not is_fifo_stream(data):
+
+
+        return False
+
+
+
+    return not is_command(
+        data
+    )
+
+
+
+
+def detect_fifo_type(data):
+
+
+    if is_command(data):
+
 
         return "COMMAND"
 
 
 
-    # TPM_RC_SUCCESS = 0
+    if is_response(data):
 
 
-    return "RESPONSE"
+        return "RESPONSE"
+
+
+
+    return "UNKNOWN"
+
 
 
 
@@ -220,69 +274,108 @@ def detect_fifo_type(data):
 def describe_fifo(data):
 
 
-    output=[]
+    output = []
+
 
 
     if not is_fifo_stream(data):
 
-        return "Not a TPM FIFO stream"
+
+        return "Invalid TPM FIFO packet"
 
 
 
-    tag=get_tag(data)
+    tag = get_tag(
+        data
+    )
 
-    size=get_size(data)
 
-    code=get_code(data)
+    size = get_size(
+        data
+    )
+
+
+    code = get_code(
+        data
+    )
 
 
 
     output.append(
+
         "TPM FIFO STREAM"
+
     )
 
 
     output.append(
+
         ""
+
     )
 
 
+
     output.append(
+
         f"TAG  : {tag:04X}"
+
     )
 
 
     output.append(
+
         f"SIZE : {size}"
+
     )
 
 
     output.append(
+
         f"TYPE : {detect_fifo_type(data)}"
+
     )
 
 
     output.append(
+
         f"CODE : {code:08X}"
+
     )
 
 
     output.append(
+
         ""
+
     )
 
 
+
     output.append(
+
         "Raw:"
+
     )
 
 
     output.append(
-        bytes_to_hex(data)
+
+        bytes_to_hex(
+
+            data
+
+        )
+
     )
 
 
-    return "\n".join(output)
+
+    return "\n".join(
+        output
+    )
+
+
 
 
 
@@ -294,7 +387,7 @@ def describe_fifo(data):
 if __name__ == "__main__":
 
 
-    sample_command = [
+    command = [
 
         0x80,0x02,
 
@@ -306,8 +399,26 @@ if __name__ == "__main__":
 
 
 
+    response = [
+
+        0x80,0x01,
+
+        0x00,0x00,0x00,0x0A,
+
+        0x00,0x00,0x00,0x00
+
+    ]
+
+
+
     print(
-        describe_fifo(
-            sample_command
-        )
+        describe_fifo(command)
+    )
+
+
+    print()
+
+
+    print(
+        describe_fifo(response)
     )

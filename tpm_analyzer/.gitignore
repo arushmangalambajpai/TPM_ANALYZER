@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual Environment
+.venv/
+
+# Generated Outputs
+output/*.csv
+output/*.txt
+
+# Keep folder
+!output/.gitkeep
