@@ -148,14 +148,36 @@ def add_field(output, value, high, low, name, description):
     )
 
 
-    output.append(
-        description
-    )
+    # Value based descriptions
+
+    if isinstance(description, dict):
+
+
+        if field in description:
+
+
+            output.append(
+                description[field]
+            )
+
+
+        else:
+
+
+            output.append(
+                "Unknown field value"
+            )
+
+
+    else:
+
+
+        output.append(
+            description
+        )
 
 
     output.append("")
-
-
 
 # =========================================================
 # TPM_ACCESS
@@ -296,8 +318,11 @@ def decode_sts(operation, data):
 
         add_field(
             output,value,27,26,
-            "tpmFamily",
-            "TPM family identifier"
+         "tpmFamily",
+            {
+             0:"TPM 1.2 family",
+             1:"TPM 2.0 family"
+            }
         )
 
 
@@ -642,15 +667,22 @@ def decode_intf_capability(operation, data):
     add_field(
         output,value,30,28,
         "InterfaceVersion",
-        "FIFO interface supported"
+        {
+            3:"FIFO interface supported"
+        }
     )
 
 
     add_field(
         output,value,10,9,
         "DataTransferSizeSupport",
-        "Maximum transfer size capability"
-    )
+        {
+            0:"Legacy transfer size only supported",
+            1:"Maximum 8 byte transfer supported",
+            2:"Maximum 32 byte transfer supported",
+            3:"Maximum 64 byte transfer supported"
+        }
+    )   
 
 
     single_bits = [
