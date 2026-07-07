@@ -1,0 +1,532 @@
+/*
+style.css
+
+TPM SPI LOG DECODER
+*/
+
+
+*
+{
+    box-sizing:border-box;
+}
+
+
+
+body
+{
+    margin:0;
+
+    min-height:100vh;
+
+    background:#020711;
+
+    color:white;
+
+    font-family:
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    overflow-x:hidden;
+}
+
+
+
+/* =====================================
+   BACKGROUND GRID
+===================================== */
+
+
+.grid
+{
+    position:fixed;
+
+    inset:0;
+
+    z-index:-1;
+
+
+    background-image:
+
+        linear-gradient(
+            rgba(0,255,255,0.12) 1px,
+            transparent 1px
+        ),
+
+        linear-gradient(
+            90deg,
+            rgba(0,255,255,0.12) 1px,
+            transparent 1px
+        );
+
+
+    background-size:
+
+        45px 45px;
+
+
+    mask-image:
+
+        radial-gradient(
+            circle,
+            black,
+            transparent 80%
+        );
+}
+
+
+
+/* =====================================
+   HEADER
+===================================== */
+
+
+header
+{
+    text-align:center;
+
+    padding:
+
+        70px 20px 40px 20px;
+}
+
+
+
+h1
+{
+    margin:0;
+
+
+    font-size:
+
+        65px;
+
+
+    letter-spacing:
+
+        5px;
+
+
+    color:
+
+        #bfffff;
+
+
+    text-shadow:
+
+        0 0 30px cyan;
+}
+
+
+
+header h2
+{
+    margin-top:
+
+        15px;
+
+
+    font-family:
+
+        "Brush Script MT",
+        cursive;
+
+
+    font-size:
+
+        34px;
+
+
+    color:
+
+        #00ffaa;
+}
+
+
+
+header p
+{
+    color:#aaa;
+
+    font-size:18px;
+}
+
+
+
+#status
+{
+    margin-top:25px;
+
+    color:#00ff99;
+
+    font-family:
+
+        Consolas,
+        monospace;
+}
+
+
+
+/* =====================================
+   MAIN MENU BUTTONS
+===================================== */
+
+
+.menu
+{
+    display:flex;
+
+    justify-content:center;
+
+    flex-wrap:wrap;
+
+    gap:35px;
+
+
+    margin:
+
+        40px auto;
+}
+
+
+
+.menu button
+{
+    width:300px;
+
+    height:120px;
+
+
+    font-size:
+
+        18px;
+
+
+    color:white;
+
+
+    background:
+
+        rgba(10,25,45,.85);
+
+
+    border:
+
+        1px solid cyan;
+
+
+    border-radius:
+
+        25px;
+
+
+    box-shadow:
+
+        0 0 20px #003344;
+
+
+    cursor:pointer;
+
+
+    transition:.25s;
+}
+
+
+
+.menu button:hover
+{
+    transform:
+
+        translateY(-8px);
+
+
+    box-shadow:
+
+        0 0 35px cyan;
+}
+
+
+
+/* =====================================
+   PANELS
+===================================== */
+
+
+.panel
+{
+    display:none;
+
+
+    width:80%;
+
+    margin:
+
+        40px auto;
+
+
+    padding:
+
+        35px;
+
+
+    background:
+
+        rgba(5,15,30,.9);
+
+
+    border:
+
+        1px solid #00ffff;
+
+
+    border-radius:
+
+        25px;
+
+
+    box-shadow:
+
+        0 0 25px #003344;
+}
+
+
+
+.panel h2
+{
+    color:#00ffff;
+}
+
+
+
+/* =====================================
+   INPUT AREAS
+===================================== */
+
+
+textarea
+{
+    width:100%;
+
+    height:140px;
+
+
+    padding:
+
+        20px;
+
+
+    background:
+
+        #000;
+
+
+    color:
+
+        #00ff99;
+
+
+    border:
+
+        1px solid #333;
+
+
+    border-radius:
+
+        12px;
+
+
+    font-size:
+
+        16px;
+
+
+    font-family:
+
+        Consolas,
+        monospace;
+}
+
+
+
+input
+{
+    margin:
+
+        20px 0;
+
+
+    color:white;
+}
+
+
+
+/* =====================================
+   ACTION BUTTONS
+===================================== */
+
+
+.panel button
+{
+    margin:
+
+        15px;
+
+
+    padding:
+
+        14px 28px;
+
+
+    border:none;
+
+
+    border-radius:
+
+        30px;
+
+
+    background:
+
+        linear-gradient(
+            90deg,
+            cyan,
+            #00ff99
+        );
+
+
+    cursor:pointer;
+
+
+    font-weight:bold;
+
+
+    transition:.2s;
+}
+
+
+
+.panel button:hover
+{
+    transform:
+
+        scale(1.05);
+}
+
+
+
+/* =====================================
+   OUTPUT TERMINAL
+===================================== */
+
+
+.terminal
+{
+    width:85%;
+
+    margin:
+
+        60px auto;
+
+
+    padding:
+
+        30px;
+
+
+    background:
+
+        rgba(0,0,0,.9);
+
+
+    border:
+
+        1px solid #222;
+
+
+    border-radius:
+
+        20px;
+
+
+    box-shadow:
+
+        inset 0 0 25px #001111;
+}
+
+
+
+.terminal h2
+{
+    color:#00ffff;
+}
+
+
+
+pre
+{
+    min-height:250px;
+
+
+    white-space:pre;
+
+
+    overflow:auto;
+
+
+    color:#00ff99;
+
+
+    font-family:
+
+        Consolas,
+
+        "Courier New",
+
+        monospace;
+
+
+    font-size:14px;
+
+
+    line-height:1.45;
+}
+
+
+
+/* =====================================
+   FOOTER
+===================================== */
+
+
+footer
+{
+    margin-top:
+
+        100px;
+
+
+    padding:
+
+        40px;
+
+
+    text-align:center;
+
+
+    color:#777;
+
+
+    background:
+
+        rgba(0,0,0,.45);
+
+
+    border-top:
+
+        1px solid #123;
+
+
+    line-height:
+
+        1.8;
+}
