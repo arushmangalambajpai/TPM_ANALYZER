@@ -426,9 +426,15 @@ Electrical and Electronics Engineering
 BITS Pilani
 
 ---
-
 # License
 
-This project is intended for research and educational use.
+This project is released under the MIT License.
 
-Refer to included third-party licenses for external components.
+See:
+
+- LICENSE
+- THIRD_PARTY_LICENSES.md
+
+for details.
+
+Third-party components retain their original licenses.
