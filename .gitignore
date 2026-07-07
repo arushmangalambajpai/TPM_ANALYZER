@@ -7,3 +7,6 @@ output/
 
 # local tests
 input.csv
+
+# local editable dependencies
+external/
